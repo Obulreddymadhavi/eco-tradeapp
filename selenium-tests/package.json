@@ -1,0 +1,14 @@
+{
+  "name": "selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium E2E Tests for EcoTrade",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/**/*.test.js --reporter spec",
+    "login": "mocha tests/login.test.js --reporter spec"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "selenium-webdriver": "^4.8.0"
+  }
+}

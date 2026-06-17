@@ -1,0 +1,47 @@
+name: Selenium E2E Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install root dependencies
+      run: npm install
+
+    - name: Install Selenium tests dependencies
+      run: |
+        cd selenium-tests
+        npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: Start application server
+      run: npm run dev &
+      env:
+        PORT: 3000
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    - name: Wait for server port
+      run: npx wait-on http://localhost:3000/auth -t 45000
+
+    - name: Run Selenium E2E Tests
+      run: |
+        cd selenium-tests
+        npm run login
