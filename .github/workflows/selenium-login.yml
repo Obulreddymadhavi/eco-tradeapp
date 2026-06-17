@@ -6,6 +6,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -15,6 +16,8 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://ikqzhzrduftxtrojvvkr.supabase.co' }}
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://ikqzhzrduftxtrojvvkr.supabase.co' }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
       LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY || 'placeholder' }}
 
     steps:
@@ -39,7 +42,7 @@ jobs:
 
     - name: Start server and run Selenium tests
       run: |
-        npm run dev &
-        npx wait-on http://localhost:8080/auth -t 90000
+        npm run dev -- --port 8080 --host 127.0.0.1 &
+        npx wait-on http://127.0.0.1:8080/auth -t 90000
         cd selenium-tests
         npm run login

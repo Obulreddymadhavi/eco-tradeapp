@@ -15,7 +15,7 @@ class EcoTradeWebE2ETests(unittest.TestCase):
         options.add_argument("--disable-dev-shm-usage")
         cls.driver = webdriver.Chrome(options=options)
         cls.driver.implicitly_wait(10)
-        cls.base_url = "http://localhost:8080"
+        cls.base_url = "http://127.0.0.1:8080"
 
     @classmethod
     def tearDownClass(cls):
