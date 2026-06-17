@@ -20,7 +20,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as CustomerIndexRouteImport } from './routes/customer.index'
 import { Route as CustomerNewRouteImport } from './routes/customer.new'
+import { Route as ApiRewardsRouteImport } from './routes/api/rewards'
+import { Route as ApiProfileRouteImport } from './routes/api/profile'
+import { Route as ApiPointsRouteImport } from './routes/api/points'
+import { Route as ApiPickupsRouteImport } from './routes/api/pickups'
+import { Route as ApiMessagesRouteImport } from './routes/api/messages'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiAiChatRouteImport } from './routes/api/ai-chat'
 
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
@@ -77,9 +83,39 @@ const CustomerNewRoute = CustomerNewRouteImport.update({
   path: '/new',
   getParentRoute: () => CustomerRoute,
 } as any)
+const ApiRewardsRoute = ApiRewardsRouteImport.update({
+  id: '/api/rewards',
+  path: '/api/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileRoute = ApiProfileRouteImport.update({
+  id: '/api/profile',
+  path: '/api/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPointsRoute = ApiPointsRouteImport.update({
+  id: '/api/points',
+  path: '/api/points',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPickupsRoute = ApiPickupsRouteImport.update({
+  id: '/api/pickups',
+  path: '/api/pickups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMessagesRoute = ApiMessagesRouteImport.update({
+  id: '/api/messages',
+  path: '/api/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiChatRoute = ApiAiChatRouteImport.update({
+  id: '/api/ai-chat',
+  path: '/api/ai-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -92,7 +128,13 @@ export interface FileRoutesByFullPath {
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vendor': typeof VendorRouteWithChildren
+  '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/messages': typeof ApiMessagesRoute
+  '/api/pickups': typeof ApiPickupsRoute
+  '/api/points': typeof ApiPointsRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/rewards': typeof ApiRewardsRoute
   '/customer/new': typeof CustomerNewRoute
   '/customer/': typeof CustomerIndexRoute
   '/vendor/': typeof VendorIndexRoute
@@ -104,7 +146,13 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/messages': typeof ApiMessagesRoute
+  '/api/pickups': typeof ApiPickupsRoute
+  '/api/points': typeof ApiPointsRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/rewards': typeof ApiRewardsRoute
   '/customer/new': typeof CustomerNewRoute
   '/customer': typeof CustomerIndexRoute
   '/vendor': typeof VendorIndexRoute
@@ -119,7 +167,13 @@ export interface FileRoutesById {
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vendor': typeof VendorRouteWithChildren
+  '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/messages': typeof ApiMessagesRoute
+  '/api/pickups': typeof ApiPickupsRoute
+  '/api/points': typeof ApiPointsRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/rewards': typeof ApiRewardsRoute
   '/customer/new': typeof CustomerNewRoute
   '/customer/': typeof CustomerIndexRoute
   '/vendor/': typeof VendorIndexRoute
@@ -135,7 +189,13 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sitemap.xml'
     | '/vendor'
+    | '/api/ai-chat'
     | '/api/chat'
+    | '/api/messages'
+    | '/api/pickups'
+    | '/api/points'
+    | '/api/profile'
+    | '/api/rewards'
     | '/customer/new'
     | '/customer/'
     | '/vendor/'
@@ -147,7 +207,13 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/sitemap.xml'
+    | '/api/ai-chat'
     | '/api/chat'
+    | '/api/messages'
+    | '/api/pickups'
+    | '/api/points'
+    | '/api/profile'
+    | '/api/rewards'
     | '/customer/new'
     | '/customer'
     | '/vendor'
@@ -161,7 +227,13 @@ export interface FileRouteTypes {
     | '/rewards'
     | '/sitemap.xml'
     | '/vendor'
+    | '/api/ai-chat'
     | '/api/chat'
+    | '/api/messages'
+    | '/api/pickups'
+    | '/api/points'
+    | '/api/profile'
+    | '/api/rewards'
     | '/customer/new'
     | '/customer/'
     | '/vendor/'
@@ -176,7 +248,13 @@ export interface RootRouteChildren {
   RewardsRoute: typeof RewardsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VendorRoute: typeof VendorRouteWithChildren
+  ApiAiChatRoute: typeof ApiAiChatRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiMessagesRoute: typeof ApiMessagesRoute
+  ApiPickupsRoute: typeof ApiPickupsRoute
+  ApiPointsRoute: typeof ApiPointsRoute
+  ApiProfileRoute: typeof ApiProfileRoute
+  ApiRewardsRoute: typeof ApiRewardsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -258,11 +336,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerNewRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/api/rewards': {
+      id: '/api/rewards'
+      path: '/api/rewards'
+      fullPath: '/api/rewards'
+      preLoaderRoute: typeof ApiRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile': {
+      id: '/api/profile'
+      path: '/api/profile'
+      fullPath: '/api/profile'
+      preLoaderRoute: typeof ApiProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/points': {
+      id: '/api/points'
+      path: '/api/points'
+      fullPath: '/api/points'
+      preLoaderRoute: typeof ApiPointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pickups': {
+      id: '/api/pickups'
+      path: '/api/pickups'
+      fullPath: '/api/pickups'
+      preLoaderRoute: typeof ApiPickupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/messages': {
+      id: '/api/messages'
+      path: '/api/messages'
+      fullPath: '/api/messages'
+      preLoaderRoute: typeof ApiMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai-chat': {
+      id: '/api/ai-chat'
+      path: '/api/ai-chat'
+      fullPath: '/api/ai-chat'
+      preLoaderRoute: typeof ApiAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -302,7 +422,13 @@ const rootRouteChildren: RootRouteChildren = {
   RewardsRoute: RewardsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VendorRoute: VendorRouteWithChildren,
+  ApiAiChatRoute: ApiAiChatRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiMessagesRoute: ApiMessagesRoute,
+  ApiPickupsRoute: ApiPickupsRoute,
+  ApiPointsRoute: ApiPointsRoute,
+  ApiProfileRoute: ApiProfileRoute,
+  ApiRewardsRoute: ApiRewardsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
