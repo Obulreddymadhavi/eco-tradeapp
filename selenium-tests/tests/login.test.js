@@ -25,7 +25,7 @@ describe('EcoTrade E2E Login Test', function () {
 
   it('should verify login elements are present', async function () {
     // Navigate to the auth page
-    await driver.get('http://localhost:3000/auth');
+    await driver.get('http://localhost:8080/auth');
 
     // Wait for the login form to load
     await driver.wait(until.elementLocated(By.id('email')), 15000);
@@ -40,7 +40,7 @@ describe('EcoTrade E2E Login Test', function () {
   });
 
   it('should reject invalid credentials and show error toast', async function () {
-    await driver.get('http://localhost:3000/auth');
+    await driver.get('http://localhost:8080/auth');
     await driver.wait(until.elementLocated(By.id('email')), 10000);
 
     // Enter bad credentials
