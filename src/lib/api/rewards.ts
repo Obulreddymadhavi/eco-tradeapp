@@ -33,15 +33,15 @@ export const getPointsBalance = createServerFn({ method: "GET" })
 
 export const redeemReward = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(z.object({ rewardId: z.string().uuid() }))
-  .handler(async ({ input, context }) => {
+  .inputValidator(z.object({ rewardId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
     // Fetch the reward to get cost and title
     const { data: reward, error: rewardErr } = await supabase
       .from("rewards")
       .select("*")
-      .eq("id", input.rewardId)
+      .eq("id", data.rewardId)
       .single();
 
     if (rewardErr || !reward) {

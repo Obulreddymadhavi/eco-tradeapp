@@ -4,43 +4,43 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const getPickupMessages = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .input(z.object({ pickupId: z.string().uuid() }))
-  .handler(async ({ input, context }) => {
+  .inputValidator(z.object({ pickupId: z.string().uuid() }))
+  .handler(async ({ data, context }) => {
     const { supabase } = context;
 
-    const { data, error } = await supabase
+    const { data: messages, error } = await supabase
       .from("pickup_messages")
       .select("*")
-      .eq("pickup_id", input.pickupId)
+      .eq("pickup_id", data.pickupId)
       .order("created_at", { ascending: true });
 
     if (error) throw new Error(error.message);
-    return data;
+    return messages;
   });
 
 export const sendPickupMessage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       pickupId: z.string().uuid(),
       body: z.string().min(1),
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data, error } = await supabase
+    const { data: message, error } = await supabase
       .from("pickup_messages")
       .insert({
-        pickup_id: input.pickupId,
+        pickup_id: data.pickupId,
         sender_id: userId,
-        body: input.body,
+        body: data.body,
       })
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return message;
   });
 
 export const getAiChat = createServerFn({ method: "GET" })
@@ -60,20 +60,20 @@ export const getAiChat = createServerFn({ method: "GET" })
 
 export const saveAiChat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(z.object({ messages: z.array(z.any()) }))
-  .handler(async ({ input, context }) => {
+  .inputValidator(z.object({ messages: z.array(z.any()) }))
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data, error } = await supabase
+    const { data: saved, error } = await supabase
       .from("ai_chats")
       .upsert({
         user_id: userId,
-        messages: input.messages,
+        messages: data.messages,
         updated_at: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return saved;
   });

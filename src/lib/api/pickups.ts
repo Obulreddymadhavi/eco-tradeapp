@@ -47,7 +47,7 @@ export const getPickups = createServerFn({ method: "GET" })
 
 export const createPickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       category: z.string(),
       description: z.string().nullable(),
@@ -65,35 +65,35 @@ export const createPickup = createServerFn({ method: "POST" })
       }),
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data, error } = await supabase
+    const { data: createdPickup, error } = await supabase
       .from("pickups")
       .insert({
         customer_id: userId,
-        category: input.category as any,
-        description: input.description,
-        estimated_weight_kg: input.estimatedWeightKg,
-        photo_urls: input.photoUrls,
-        scheduled_date: input.scheduledDate,
-        scheduled_time: input.scheduledTime,
-        address: input.address,
-        latitude: input.latitude,
-        longitude: input.longitude,
-        customer_snapshot: input.customerSnapshot as any,
+        category: data.category as any,
+        description: data.description,
+        estimated_weight_kg: data.estimatedWeightKg,
+        photo_urls: data.photoUrls,
+        scheduled_date: data.scheduledDate,
+        scheduled_time: data.scheduledTime,
+        address: data.address,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        customer_snapshot: data.customerSnapshot as any,
         status: "pending",
       })
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return createdPickup;
   });
 
 export const acceptPickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       pickupId: z.string().uuid(),
       vendorSnapshot: z.object({
@@ -104,68 +104,68 @@ export const acceptPickup = createServerFn({ method: "POST" })
       }),
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data, error } = await supabase
+    const { data: acceptedPickup, error } = await supabase
       .from("pickups")
       .update({
         vendor_id: userId,
         status: "accepted",
-        vendor_snapshot: input.vendorSnapshot as any,
+        vendor_snapshot: data.vendorSnapshot as any,
       })
-      .eq("id", input.pickupId)
+      .eq("id", data.pickupId)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return acceptedPickup;
   });
 
 export const updatePickupStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       pickupId: z.string().uuid(),
       status: z.string(), // PickupStatus
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase } = context;
 
-    const { data, error } = await supabase
+    const { data: updatedPickup, error } = await supabase
       .from("pickups")
-      .update({ status: input.status as PickupStatus })
-      .eq("id", input.pickupId)
+      .update({ status: data.status as PickupStatus })
+      .eq("id", data.pickupId)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return updatedPickup;
   });
 
 export const completePickup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       pickupId: z.string().uuid(),
       finalWeightKg: z.number(),
       finalAmount: z.number(),
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase } = context;
 
     // Fetch the pickup to get customer id and waste category
     const { data: p, error: getErr } = await supabase
       .from("pickups")
       .select("*")
-      .eq("id", input.pickupId)
+      .eq("id", data.pickupId)
       .single();
 
     if (getErr || !p) throw new Error(getErr?.message ?? "Pickup not found");
 
-    const points = Math.max(10, Math.round(input.finalWeightKg * 10));
+    const points = Math.max(10, Math.round(data.finalWeightKg * 10));
 
     // Update pickup status to completed and record details
     const { data: updatedPickup, error: updateErr } = await supabase
@@ -173,10 +173,10 @@ export const completePickup = createServerFn({ method: "POST" })
       .update({
         status: "completed",
         payment_status: "cash_paid",
-        final_weight_kg: input.finalWeightKg,
-        final_amount: input.finalAmount,
+        final_weight_kg: data.finalWeightKg,
+        final_amount: data.finalAmount,
       })
-      .eq("id", input.pickupId)
+      .eq("id", data.pickupId)
       .select()
       .single();
 
@@ -186,7 +186,7 @@ export const completePickup = createServerFn({ method: "POST" })
     const { error: pointsErr } = await supabase.from("eco_points").insert({
       user_id: p.customer_id,
       points,
-      reason: `Pickup of ${input.finalWeightKg}kg ${p.category}`,
+      reason: `Pickup of ${data.finalWeightKg}kg ${p.category}`,
       pickup_id: p.id,
     });
 

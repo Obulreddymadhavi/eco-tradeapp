@@ -21,7 +21,7 @@ export const getUserProfile = createServerFn({ method: "GET" })
 
 export const updateUserProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .input(
+  .inputValidator(
     z.object({
       fullName: z.string().min(1),
       phone: z.string().nullable(),
@@ -30,9 +30,9 @@ export const updateUserProfile = createServerFn({ method: "POST" })
       vehicleInfo: z.string().nullable(),
     })
   )
-  .handler(async ({ input, context }) => {
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { fullName, phone, address, companyName, vehicleInfo } = input;
+    const { fullName, phone, address, companyName, vehicleInfo } = data;
 
     // Fetch the role to double check if vendor information is appropriate
     const { data: roleRow } = await supabase
@@ -42,7 +42,7 @@ export const updateUserProfile = createServerFn({ method: "POST" })
       .maybeSingle();
     const role = (roleRow?.role as AppRole) ?? "customer";
 
-    const { data, error } = await supabase
+    const { data: updatedProfile, error } = await supabase
       .from("profiles")
       .update({
         full_name: fullName,
@@ -59,5 +59,5 @@ export const updateUserProfile = createServerFn({ method: "POST" })
       throw new Error(error.message);
     }
 
-    return data as Profile;
+    return updatedProfile as Profile;
   });
