@@ -36,13 +36,9 @@ jobs:
     - name: Build project
       run: npm run build
 
-    - name: Start application server
-      run: npm run dev &
-
-    - name: Wait for server port
-      run: npx wait-on http://localhost:3000/auth -t 90000
-
-    - name: Run Selenium E2E Tests
+    - name: Start server and run Selenium tests
       run: |
+        npm run dev &
+        npx wait-on http://localhost:3000/auth -t 90000
         cd selenium-tests
         npm run login
