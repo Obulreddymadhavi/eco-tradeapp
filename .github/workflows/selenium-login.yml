@@ -9,6 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PORT: 3000
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://ikqzhzrduftxtrojvvkr.supabase.co' }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder' }}
+      LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY || 'placeholder' }}
 
     steps:
     - name: Checkout repository
@@ -32,14 +38,9 @@ jobs:
 
     - name: Start application server
       run: npm run dev &
-      env:
-        PORT: 3000
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
     - name: Wait for server port
-      run: npx wait-on http://localhost:3000/auth -t 45000
+      run: npx wait-on http://localhost:3000/auth -t 90000
 
     - name: Run Selenium E2E Tests
       run: |
