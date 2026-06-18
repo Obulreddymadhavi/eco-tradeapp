@@ -64,8 +64,11 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
         </div>
       </header>
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-border py-6 mt-12 text-center text-sm text-muted-foreground">
-        EcoTrade · Recycle smarter, earn greener
+      <footer className="border-t border-border py-6 mt-12 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
+        <div>EcoTrade · Recycle smarter, earn greener</div>
+        <div>
+          <Link to="/tests" className="hover:underline text-leaf font-semibold">🔍 E2E Test Report & Summary</Link>
+        </div>
       </footer>
     </div>
   );
