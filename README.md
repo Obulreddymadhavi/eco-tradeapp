@@ -35,5 +35,6 @@ The repository is equipped with a complete E2E testing framework saved in separa
 
 ## 🚀 CI/CD Pipeline & Deployment
 
+* **Deployment**: The application is deployed live at [https://eco-tradeapp-43u8.vercel.app/](https://eco-tradeapp-43u8.vercel.app/).
 * **GitHub Actions** (`.github/workflows/selenium-login.yml`): Automates testing on code pushes or pull requests to `main` branch. Installs dependencies, compiles the project, starts the web server locally, and triggers the Selenium E2E test runs.
 * **Static Deployment Configuration**: Ready with `homepage` properties and `gh-pages` commands in `package.json` for static asset exports.

@@ -3,7 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
-  "homepage": "https://peddi.github.io/eco-tradeapp-main",
+  "homepage": "https://eco-tradeapp-43u8.vercel.app/",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
