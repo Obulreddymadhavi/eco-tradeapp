@@ -16,8 +16,8 @@ export async function requireApiAuth(request: Request) {
     throw new Error("Unauthorized: No token provided");
   }
 
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const SUPABASE_URL = process.env.SUPABASE_URL || "https://azezbvzqyhopmlzybtcx.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_VYwOqXtDruPAhFtrAMGHow_v6e60MD-";
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
