@@ -2,6 +2,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { Leaf, LogOut, User as UserIcon, Gift, Truck, ClipboardList, Home, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut, useAuth, type AppRole } from "@/lib/auth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { ReactNode } from "react";
 
 export function AppShell({ children, requireAuth, requireRole }: { children: ReactNode; requireAuth?: boolean; requireRole?: AppRole }) {
@@ -48,6 +49,7 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
             {user && (
               <NavLink to="/assistant" icon={<Bot className="h-4 w-4" />}>EcoBot</NavLink>
             )}
+            <ThemeToggle />
             {user ? (
               <>
                 <NavLink to="/profile" icon={<UserIcon className="h-4 w-4" />}>Profile</NavLink>
