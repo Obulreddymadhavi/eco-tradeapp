@@ -26,6 +26,7 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
 
   return (
     <div className="min-h-screen flex flex-col">
+      {user && <ChatNotifications />}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 min-w-0 shrink-0">

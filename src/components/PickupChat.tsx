@@ -36,6 +36,12 @@ export function PickupChat({
   useEffect(() => {
     if (!open || !user) return;
     let cancelled = false;
+
+    // Mark this pickup as the actively-viewed chat so global notifications skip it
+    if (typeof window !== "undefined") {
+      (window as unknown as { __activeChatPickupId?: string }).__activeChatPickupId = pickupId;
+    }
+
     getPickupMessages({ data: { pickupId } })
       .then((data) => {
         if (!cancelled) setMessages((data as unknown as PickupMessage[]) ?? []);
@@ -56,6 +62,10 @@ export function PickupChat({
     return () => {
       cancelled = true;
       supabase.removeChannel(channel);
+      if (typeof window !== "undefined") {
+        const w = window as unknown as { __activeChatPickupId?: string };
+        if (w.__activeChatPickupId === pickupId) delete w.__activeChatPickupId;
+      }
     };
   }, [open, pickupId, user]);
 
