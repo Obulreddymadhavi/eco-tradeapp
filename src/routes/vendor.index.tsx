@@ -175,20 +175,21 @@ function VendorPickupCard({ p, vendorProfile, userId }: { p: Pickup; vendorProfi
     }
   }
 
-  async function completePickup() {
+  async function handleComplete() {
     if (!finalWeight || !finalAmount) { toast.error("Enter weight and cash amount"); return; }
     setWorking(true);
     try {
       const weight = Number(finalWeight);
       const amount = Number(finalAmount);
-      const { pointsAwarded } = await completePickup({
+      const result = await completePickup({
         data: {
           pickupId: p.id,
           finalWeightKg: weight,
           finalAmount: amount,
         }
-      });
-      toast.success(`Completed! Customer earned ${pointsAwarded} Eco Points`);
+      }) as { pointsAwarded?: number } | void;
+      const pts = (result && typeof result === "object" && "pointsAwarded" in result) ? result.pointsAwarded : undefined;
+      toast.success(pts ? `Completed! Customer earned ${pts} Eco Points` : "Pickup completed");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to complete pickup");
     } finally {
