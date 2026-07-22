@@ -284,7 +284,7 @@ function VendorPickupCard({ p, vendorProfile, userId }: { p: Pickup; vendorProfi
                 <Input type="number" step="1" value={finalAmount} onChange={(e) => setFinalAmount(e.target.value)} />
               </div>
             </div>
-            <Button onClick={completePickup} disabled={working} className="w-full bg-eco-gradient">
+            <Button onClick={handleComplete} disabled={working} className="w-full bg-eco-gradient">
               Confirm cash paid & complete
             </Button>
           </div>
