@@ -111,8 +111,12 @@ export const Route = createFileRoute("/api/chat")({
 });
 
 function getMockResponse(messages: UIMessage[]): string {
-  const lastMessage = messages[messages.length - 1];
-  const query = (typeof lastMessage?.content === "string" ? lastMessage.content : "").toLowerCase();
+  const lastMessage = messages[messages.length - 1] as { content?: unknown; parts?: Array<{ type?: string; text?: string }> } | undefined;
+  const fromContent = typeof lastMessage?.content === "string" ? lastMessage.content : "";
+  const fromParts = Array.isArray(lastMessage?.parts)
+    ? lastMessage.parts.filter((p) => p?.type === "text").map((p) => p?.text ?? "").join(" ")
+    : "";
+  const query = (fromContent || fromParts).toLowerCase();
 
   if (query.includes("point") || query.includes("earn") || query.includes("balance")) {
     return "You earn 10 Eco Points for every kilogram of waste collected by our vendors. These points can be redeemed in the Rewards tab for gift vouchers, saplings, and eco-friendly products!";
