@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as TestsRouteImport } from './routes/tests'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -31,6 +32,11 @@ import { Route as ApiAiChatRouteImport } from './routes/api/ai-chat'
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
   path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestsRoute = TestsRouteImport.update({
+  id: '/tests',
+  path: '/tests',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tests': typeof TestsRoute
   '/vendor': typeof VendorRouteWithChildren
   '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tests': typeof TestsRoute
   '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
   '/api/messages': typeof ApiMessagesRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/rewards': typeof RewardsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/tests': typeof TestsRoute
   '/vendor': typeof VendorRouteWithChildren
   '/api/ai-chat': typeof ApiAiChatRoute
   '/api/chat': typeof ApiChatRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/sitemap.xml'
+    | '/tests'
     | '/vendor'
     | '/api/ai-chat'
     | '/api/chat'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/sitemap.xml'
+    | '/tests'
     | '/api/ai-chat'
     | '/api/chat'
     | '/api/messages'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/sitemap.xml'
+    | '/tests'
     | '/vendor'
     | '/api/ai-chat'
     | '/api/chat'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RewardsRoute: typeof RewardsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TestsRoute: typeof TestsRoute
   VendorRoute: typeof VendorRouteWithChildren
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tests': {
+      id: '/tests'
+      path: '/tests'
+      fullPath: '/tests'
+      preLoaderRoute: typeof TestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RewardsRoute: RewardsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TestsRoute: TestsRoute,
   VendorRoute: VendorRouteWithChildren,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiChatRoute: ApiChatRoute,
