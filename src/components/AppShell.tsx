@@ -3,6 +3,7 @@ import { Leaf, LogOut, User as UserIcon, Gift, Truck, ClipboardList, Home, Bot }
 import { Button } from "@/components/ui/button";
 import { signOut, useAuth, type AppRole } from "@/lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ChatNotifications } from "@/components/ChatNotifications";
 import type { ReactNode } from "react";
 
 export function AppShell({ children, requireAuth, requireRole }: { children: ReactNode; requireAuth?: boolean; requireRole?: AppRole }) {
