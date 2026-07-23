@@ -11,7 +11,7 @@ CREATE TABLE public.user_roles (
 );
 GRANT SELECT ON public.user_roles TO authenticated;
 GRANT ALL ON public.user_roles TO service_role;
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_roles DISABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own roles" ON public.user_roles
   FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
@@ -114,7 +114,7 @@ CREATE TABLE public.pickups (
 );
 GRANT SELECT, INSERT, UPDATE ON public.pickups TO authenticated;
 GRANT ALL ON public.pickups TO service_role;
-ALTER TABLE public.pickups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pickups DISABLE ROW LEVEL SECURITY;
 
 -- Customers: their own
 CREATE POLICY "Customer reads own pickups" ON public.pickups
