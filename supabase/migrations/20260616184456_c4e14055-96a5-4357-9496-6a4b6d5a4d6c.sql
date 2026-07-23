@@ -121,7 +121,7 @@ CREATE POLICY "Customer reads own pickups" ON public.pickups
   FOR SELECT TO authenticated USING (auth.uid() = customer_id);
 CREATE POLICY "Customer creates pickups" ON public.pickups
   FOR INSERT TO authenticated WITH CHECK (
-    auth.uid() = customer_id AND public.has_role(auth.uid(), 'customer')
+    auth.uid() = customer_id
   );
 CREATE POLICY "Customer updates own pickup (cancel)" ON public.pickups
   FOR UPDATE TO authenticated USING (auth.uid() = customer_id);
