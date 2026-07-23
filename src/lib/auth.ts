@@ -60,12 +60,57 @@ export function useAuth() {
   }, []);
 
   async function loadProfile(userId: string) {
-    const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-    ]);
-    setRole((roleRow?.role as AppRole | undefined) ?? "customer");
-    setProfile(profileRow as Profile | null);
+    let roleVal: AppRole = "customer";
+    let profileVal: Profile | null = null;
+
+    try {
+      const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      ]);
+
+      roleVal = (roleRow?.role as AppRole | undefined) ?? "customer";
+      profileVal = profileRow as Profile | null;
+
+      // Safety fallback: if authenticated user has no profile row, create it
+      if (!profileVal) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+        if (user) {
+          const newProfile = {
+            id: userId,
+            full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Customer",
+            email: user.email ?? null,
+            phone: user.user_metadata?.phone ?? null,
+            address: user.user_metadata?.address ?? null,
+            company_name: user.user_metadata?.company_name ?? null,
+            vehicle_info: user.user_metadata?.vehicle_info ?? null,
+          };
+          
+          const { data: insertedProfile } = await supabase
+            .from("profiles")
+            .insert(newProfile)
+            .select()
+            .maybeSingle();
+          
+          if (insertedProfile) {
+            profileVal = insertedProfile as Profile;
+          }
+        }
+      }
+
+      // Safety fallback: if user has no role row, create it
+      if (!roleRow && profileVal) {
+        const defaultRole = (profileVal.company_name || profileVal.vehicle_info) ? "vendor" : "customer";
+        await supabase.from("user_roles").insert({ user_id: userId, role: defaultRole });
+        roleVal = defaultRole;
+      }
+    } catch (e) {
+      console.error("Failed to load or initialize profile/role:", e);
+    }
+
+    setRole(roleVal);
+    setProfile(profileVal);
   }
 
   return { session, user, role, profile, loading, reload: () => user && loadProfile(user.id) };

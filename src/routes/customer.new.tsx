@@ -57,15 +57,27 @@ function NewPickupPage() {
       return;
     }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
+
+    // Use watchPosition for more accurate "live" updates while on this screen
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        toast.success("Location shared");
+        setLocating(false);
+        // Optional: reverse geocode or just inform user
+        toast.success("Live location updated");
+      },
+      (err) => {
+        console.error("Location error:", err);
+        toast.error("Could not get location. Ensure GPS is on.");
         setLocating(false);
       },
-      () => { toast.error("Could not get location"); setLocating(false); },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
+
+    // Stop watching after 20 seconds to save battery
+    setTimeout(() => {
+      navigator.geolocation.clearWatch(watchId);
+    }, 20000);
   }
 
   async function uploadPhotos(): Promise<string[]> {
@@ -73,9 +85,18 @@ function NewPickupPage() {
     const urls: string[] = [];
     for (const file of files) {
       const path = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-      const { error } = await supabase.storage.from("waste-photos").upload(path, file);
-      if (error) throw error;
-      urls.push(path);
+      try {
+        const { error } = await supabase.storage.from("waste-photos").upload(path, file);
+        if (error) {
+          console.error("Storage upload failed:", error);
+          toast.error("Photo upload failed. Please ensure the 'waste-photos' bucket is created in Supabase.");
+        } else {
+          urls.push(path);
+        }
+      } catch (err) {
+        console.error("Storage upload exception:", err);
+        toast.error("Could not connect to storage. Photo skipped.");
+      }
     }
     return urls;
   }
@@ -98,7 +119,7 @@ function NewPickupPage() {
           latitude: coords?.lat ?? null,
           longitude: coords?.lng ?? null,
           customerSnapshot: {
-            fullName: profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Customer",
+            full_name: profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Customer",
             phone: profile?.phone ?? null,
             address: (address || profile?.address) ?? null,
           },

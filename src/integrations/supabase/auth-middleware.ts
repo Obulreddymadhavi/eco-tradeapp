@@ -16,8 +16,8 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
       return s;
     };
 
-    const SUPABASE_URL = getEnv(process.env.SUPABASE_URL, "https://azezbvzqyhopmlzybtcx.supabase.co");
-    const SUPABASE_PUBLISHABLE_KEY = getEnv(process.env.SUPABASE_PUBLISHABLE_KEY, "sb_publishable_VYwOqXtDruPAhFtrAMGHow_v6e60MD-");
+    const SUPABASE_URL = getEnv(import.meta.env?.VITE_SUPABASE_URL || process.env.SUPABASE_URL, "https://iayxhdmqjmtlwsasjosr.supabase.co");
+    const SUPABASE_PUBLISHABLE_KEY = getEnv(import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY, "sb_publishable_wIg18clxbTd_exNUmNhctw_iPFueXCl");
 
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       const missing = [
@@ -98,7 +98,7 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
       context: {
         supabase,
         userId: claims.sub,
-        claims,
+        claims: claims,
       },
     });
   },

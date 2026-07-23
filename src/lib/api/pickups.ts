@@ -59,7 +59,7 @@ export const createPickup = createServerFn({ method: "POST" })
       latitude: z.number().nullable(),
       longitude: z.number().nullable(),
       customerSnapshot: z.object({
-        fullName: z.string(),
+        full_name: z.string(),
         phone: z.string().nullable(),
         address: z.string().nullable(),
       }),

@@ -17,6 +17,27 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
     if (typeof window !== "undefined") router.navigate({ to: "/auth", search: { mode: "signin", role: "customer" } });
     return <FullScreenSpinner />;
   }
+  if (requireAuth && user && !user.email_confirmed_at) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background px-4">
+        <div className="max-w-md w-full text-center space-y-4 p-6 border-2 rounded-2xl shadow-leaf">
+          <div className="mx-auto h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 grid place-items-center font-bold text-lg">!</div>
+          <h2 className="text-xl font-bold">Please verify your email</h2>
+          <p className="text-muted-foreground text-sm">
+            We've sent a verification link to <strong>{user.email}</strong>. Please check your inbox and verify your email before accessing the dashboard.
+          </p>
+          <div className="flex flex-col gap-2">
+            <Button onClick={() => window.location.reload()} className="w-full bg-eco-gradient shadow-leaf">
+              I've verified my email
+            </Button>
+            <Button variant="outline" onClick={() => signOut()} className="w-full">
+              Sign out
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (requireRole && role && role !== requireRole && role !== "admin") {
     if (typeof window !== "undefined") {
       router.navigate({ to: role === "vendor" ? "/vendor" : "/customer" });

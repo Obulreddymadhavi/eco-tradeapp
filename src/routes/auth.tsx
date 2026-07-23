@@ -43,7 +43,7 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
@@ -58,22 +58,38 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to EcoTrade!");
+        
+        if (data?.session) {
+          toast.success("Welcome to EcoTrade!");
+          // Wait briefly for role to be available, then redirect by role
+          setTimeout(async () => {
+            try {
+              const { role } = await getUserProfile();
+              navigate({ to: role === "vendor" ? "/vendor" : "/customer" });
+            } catch (err) {
+              console.error("Failed to load user profile:", err);
+              navigate({ to: "/customer" });
+            }
+          }, 500);
+        } else {
+          toast.success("Verification email sent! Please check your inbox and verify your email to log in.");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in");
+        
+        // Wait briefly for role to be available, then redirect by role
+        setTimeout(async () => {
+          try {
+            const { role } = await getUserProfile();
+            navigate({ to: role === "vendor" ? "/vendor" : "/customer" });
+          } catch (err) {
+            console.error("Failed to load user profile:", err);
+            navigate({ to: "/customer" });
+          }
+        }, 500);
       }
-      // Wait briefly for role to be available, then redirect by role
-      setTimeout(async () => {
-        try {
-          const { role } = await getUserProfile();
-          navigate({ to: role === "vendor" ? "/vendor" : "/customer" });
-        } catch (err) {
-          console.error("Failed to load user profile:", err);
-          navigate({ to: "/customer" });
-        }
-      }, 200);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Authentication failed";
       toast.error(msg.includes("already") ? "Account already exists. Try signing in." : msg);
