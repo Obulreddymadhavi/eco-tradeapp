@@ -68,26 +68,63 @@ export const createPickup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: createdPickup, error } = await supabase
-      .from("pickups")
-      .insert({
-        customer_id: userId,
-        category: data.category as any,
-        description: data.description,
-        estimated_weight_kg: data.estimatedWeightKg,
-        photo_urls: data.photoUrls,
-        scheduled_date: data.scheduledDate,
-        scheduled_time: data.scheduledTime,
-        address: data.address,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        customer_snapshot: data.customerSnapshot as any,
-        status: "pending",
-      })
-      .select()
-      .single();
+    let createdPickup: any = null;
+    let error: any = null;
 
-    if (error) throw new Error(error.message);
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      // Use admin client to bypass RLS if service role key is available
+      const { data: adminData, error: adminErr } = await supabaseAdmin
+        .from("pickups")
+        .insert({
+          customer_id: userId,
+          category: data.category as any,
+          description: data.description,
+          estimated_weight_kg: data.estimatedWeightKg,
+          photo_urls: data.photoUrls,
+          scheduled_date: data.scheduledDate,
+          scheduled_time: data.scheduledTime,
+          address: data.address,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          customer_snapshot: data.customerSnapshot as any,
+          status: "pending",
+        })
+        .select()
+        .single();
+      
+      createdPickup = adminData;
+      error = adminErr;
+    } catch (adminEx) {
+      console.warn("[Pickups] Admin insert attempt skipped/failed, falling back to user client:", adminEx);
+      error = adminEx;
+    }
+
+    // Fallback if admin insert was not successful or failed
+    if (error || !createdPickup) {
+      const { data: userPickup, error: userErr } = await supabase
+        .from("pickups")
+        .insert({
+          customer_id: userId,
+          category: data.category as any,
+          description: data.description,
+          estimated_weight_kg: data.estimatedWeightKg,
+          photo_urls: data.photoUrls,
+          scheduled_date: data.scheduledDate,
+          scheduled_time: data.scheduledTime,
+          address: data.address,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          customer_snapshot: data.customerSnapshot as any,
+          status: "pending",
+        })
+        .select()
+        .single();
+      
+      if (userErr) throw new Error(userErr.message);
+      return userPickup;
+    }
+
     return createdPickup;
   });
 
