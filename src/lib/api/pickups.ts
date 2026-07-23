@@ -8,12 +8,12 @@ export const getPickups = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const { data: roleRow } = await supabase
+    const { data: roleRows } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .maybeSingle();
-    const role = roleRow?.role ?? "customer";
+      .eq("user_id", userId);
+    const roles = roleRows?.map((r) => r.role) || [];
+    const role = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : "customer";
 
     let query = supabase.from("pickups").select("*");
     if (role === "customer") {
@@ -122,18 +122,17 @@ export const createPickup = createServerFn({ method: "POST" })
         .single();
       
       if (userErr) {
-        const { data: roleRow } = await supabase
+        const { data: roleRows } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", userId)
-          .maybeSingle();
+          .eq("user_id", userId);
         const { data: profileRow } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", userId)
           .maybeSingle();
         
-        const dbRole = roleRow?.role ?? "NONE";
+        const dbRole = roleRows?.map(r => r.role).join(", ") ?? "NONE";
         const hasProfile = !!profileRow;
         
         throw new Error(

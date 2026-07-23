@@ -8,13 +8,41 @@ export const Route = createFileRoute("/api/profile")({
         try {
           const { supabase, userId } = await requireApiAuth(request);
 
-          const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
-            supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+          const [{ data: roleRows }, { data: profileRow }] = await Promise.all([
+            supabase.from("user_roles").select("role").eq("user_id", userId),
             supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
           ]);
 
+          const roles = roleRows?.map((r) => r.role) || [];
+          let role = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : roles.includes("customer") ? "customer" : undefined;
+
+          if (!role) {
+            let metadataRole: string | undefined;
+            try {
+              const { data: { user: authUser } } = await supabase.auth.getUser();
+              metadataRole = authUser?.user_metadata?.role;
+            } catch (err) {
+              console.warn("[API Auth] Failed to fetch auth user metadata for role check:", err);
+            }
+
+            const isVendor = metadataRole === "vendor" || !!(profileRow?.company_name || profileRow?.vehicle_info);
+            role = isVendor ? "vendor" : "customer";
+            try {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              const { error: insertErr } = await supabaseAdmin.from("user_roles").insert({
+                user_id: userId,
+                role: role
+              });
+              if (insertErr) {
+                console.warn("[API Auth] Failed to auto-insert user role: ", insertErr.message);
+              }
+            } catch (err) {
+              console.error("[API Auth] Exception during user role fallback assignment:", err);
+            }
+          }
+
           return Response.json({
-            role: roleRow?.role ?? "customer",
+            role,
             profile: profileRow,
           });
         } catch (err) {
@@ -33,12 +61,12 @@ export const Route = createFileRoute("/api/profile")({
             return new Response("fullName is required", { status: 400 });
           }
 
-          const { data: roleRow } = await supabase
+          const { data: roleRows } = await supabase
             .from("user_roles")
             .select("role")
-            .eq("user_id", userId)
-            .maybeSingle();
-          const role = roleRow?.role ?? "customer";
+            .eq("user_id", userId);
+          const roles = roleRows?.map((r) => r.role) || [];
+          const role = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : "customer";
 
           const { data, error } = await supabase
             .from("profiles")

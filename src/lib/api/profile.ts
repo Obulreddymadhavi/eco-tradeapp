@@ -12,20 +12,30 @@ export const getUserProfile = createServerFn({ method: "GET" })
     const { ensureBucketsExist } = await import("@/integrations/supabase/client.server");
     await ensureBucketsExist().catch(err => console.error("Bucket init failed:", err));
 
-    let [{ data: roleRow }, { data: profileRow }] = await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+    let [{ data: roleRows }, { data: profileRow }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", userId),
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     ]);
 
-    let role = roleRow?.role as AppRole | undefined;
+    const roles = roleRows?.map((r) => r.role as AppRole) || [];
+    let role = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : roles.includes("customer") ? "customer" : undefined;
 
     if (!role) {
-      role = "customer";
+      let metadataRole: string | undefined;
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        metadataRole = authUser?.user_metadata?.role;
+      } catch (err) {
+        console.warn("[Auth] Failed to fetch auth user metadata for role check:", err);
+      }
+
+      const isVendor = metadataRole === "vendor" || !!(profileRow?.company_name || profileRow?.vehicle_info);
+      role = isVendor ? "vendor" : "customer";
       try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { error: insertErr } = await supabaseAdmin.from("user_roles").insert({
           user_id: userId,
-          role: "customer"
+          role: role
         });
         if (insertErr) {
           console.warn("[Auth] Failed to auto-insert user role: ", insertErr.message);

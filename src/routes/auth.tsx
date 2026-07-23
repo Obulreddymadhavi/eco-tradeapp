@@ -13,8 +13,14 @@ import { Leaf, Truck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
-  mode: z.enum(["signin", "signup"]).optional().default("signin"),
-  role: z.enum(["customer", "vendor"]).optional().default("customer"),
+  mode: z.preprocess(
+    (val) => (typeof val === "string" ? val.replace(/\.+$/, "") : val),
+    z.enum(["signin", "signup"])
+  ).optional().default("signin"),
+  role: z.preprocess(
+    (val) => (typeof val === "string" ? val.replace(/\.+$/, "") : val),
+    z.enum(["customer", "vendor"])
+  ).optional().default("customer"),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -116,12 +122,12 @@ function AuthPage() {
               </TabsList>
 
               <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+                <div className="grid grid-cols-2 gap-2">
+                  <RoleButton active={role === "customer"} onClick={() => setRole("customer")} icon={<UserIcon className="h-5 w-5" />} label="Customer" />
+                  <RoleButton active={role === "vendor"} onClick={() => setRole("vendor")} icon={<Truck className="h-5 w-5" />} label="Vendor" />
+                </div>
                 {mode === "signup" && (
                   <>
-                    <div className="grid grid-cols-2 gap-2">
-                      <RoleButton active={role === "customer"} onClick={() => setRole("customer")} icon={<UserIcon className="h-5 w-5" />} label="Customer" />
-                      <RoleButton active={role === "vendor"} onClick={() => setRole("vendor")} icon={<Truck className="h-5 w-5" />} label="Vendor" />
-                    </div>
                     <Field id="full_name" label="Full name" value={fullName} onChange={setFullName} required />
                     <Field id="phone" label="Phone" value={phone} onChange={setPhone} required type="tel" />
                     <Field id="address" label="Address" value={address} onChange={setAddress} required />
@@ -136,7 +142,7 @@ function AuthPage() {
                 <Field id="email" label="Email" type="email" value={email} onChange={setEmail} required />
                 <Field id="password" label="Password" type="password" value={password} onChange={setPassword} required minLength={6} />
                 <Button id="login-button" type="submit" className="w-full bg-eco-gradient shadow-leaf" size="lg" disabled={loading}>
-                  {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+                  {loading ? "Please wait…" : mode === "signup" ? `Sign up as ${role.charAt(0).toUpperCase() + role.slice(1)}` : `Sign in as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
                 </Button>
               </form>
 

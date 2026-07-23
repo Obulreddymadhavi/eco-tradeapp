@@ -122,17 +122,21 @@ function VendorPickupCard({ p, vendorProfile, userId }: { p: Pickup; vendorProfi
   async function accept() {
     setWorking(true);
     try {
-      await acceptPickup({
-        data: {
-          pickupId: p.id,
-          vendorSnapshot: {
-            fullName: vendorProfile?.full_name ?? "",
+      const { error } = await supabase
+        .from("pickups")
+        .update({
+          vendor_id: userId,
+          status: "accepted",
+          vendor_snapshot: {
+            full_name: vendorProfile?.full_name ?? "",
             phone: vendorProfile?.phone ?? null,
-            companyName: vendorProfile?.company_name ?? null,
-            vehicleInfo: vendorProfile?.vehicle_info ?? null,
+            company_name: vendorProfile?.company_name ?? null,
+            vehicle_info: vendorProfile?.vehicle_info ?? null,
           }
-        }
-      });
+        })
+        .eq("id", p.id);
+
+      if (error) throw error;
       toast.success("Pickup accepted");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to accept pickup");

@@ -9,12 +9,12 @@ export const Route = createFileRoute("/api/pickups")({
         try {
           const { supabase, userId } = await requireApiAuth(request);
 
-          const { data: roleRow } = await supabase
+          const { data: roleRows } = await supabase
             .from("user_roles")
             .select("role")
-            .eq("user_id", userId)
-            .maybeSingle();
-          const role = roleRow?.role ?? "customer";
+            .eq("user_id", userId);
+          const roles = roleRows?.map((r) => r.role) || [];
+          const role = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : "customer";
 
           let query = supabase.from("pickups").select("*");
           if (role === "customer") {

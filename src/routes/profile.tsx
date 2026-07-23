@@ -73,7 +73,11 @@ function ProfilePage() {
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
+
+      if (upErr) {
+        console.error("Avatar upload error:", upErr);
+        throw new Error(`Upload failed: ${upErr.message}. Ensure the 'avatars' bucket exists.`);
+      }
 
       // Delete previous avatar file (best effort)
       if (avatarPath && avatarPath !== path) {
@@ -118,15 +122,19 @@ function ProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      await updateUserProfile({
-        data: {
-          fullName,
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
           phone: phone || null,
           address: address || null,
-          companyName: role === "vendor" ? (company || null) : null,
-          vehicleInfo: role === "vendor" ? (vehicle || null) : null,
-        }
-      });
+          company_name: role === "vendor" ? (company || null) : null,
+          vehicle_info: role === "vendor" ? (vehicle || null) : null,
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
       toast.success("Profile saved");
       reload();
     } catch (err) {

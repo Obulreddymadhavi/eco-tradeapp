@@ -64,12 +64,15 @@ export function useAuth() {
     let profileVal: Profile | null = null;
 
     try {
-      // Use the server function to fetch profile and ensure buckets exist
-      const { getUserProfile } = await import("@/lib/api/profile");
-      const data = await getUserProfile();
+      const [{ data: roleRows }, { data: profileRow }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      ]);
 
-      roleVal = data.role;
-      profileVal = data.profile;
+      profileVal = profileRow as Profile | null;
+      
+      const roles = roleRows?.map((r) => r.role as AppRole) || [];
+      roleVal = roles.includes("admin") ? "admin" : roles.includes("vendor") ? "vendor" : roles.includes("customer") ? "customer" : "customer";
 
       // Safety fallback: if authenticated user has no profile row, create it
       if (!profileVal) {
@@ -98,11 +101,20 @@ export function useAuth() {
         }
       }
 
-      // Safety fallback: if user has no role row, create it
-      if (!roleRow && profileVal) {
-        const defaultRole = (profileVal.company_name || profileVal.vehicle_info) ? "vendor" : "customer";
-        await supabase.from("user_roles").insert({ user_id: userId, role: defaultRole });
-        roleVal = defaultRole;
+      // Safety fallback: if user has no role row, delegate initialization to server-side getUserProfile function
+      if (roles.length === 0) {
+        try {
+          const { getUserProfile } = await import("@/lib/api/profile");
+          const res = await getUserProfile();
+          if (res && res.role) {
+            roleVal = res.role;
+            if (res.profile) {
+              profileVal = res.profile as Profile;
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load or initialize user profile/role via server function:", err);
+        }
       }
     } catch (e) {
       console.error("Failed to load or initialize profile/role:", e);
