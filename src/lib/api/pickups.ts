@@ -97,10 +97,10 @@ export const acceptPickup = createServerFn({ method: "POST" })
     z.object({
       pickupId: z.string().uuid(),
       vendorSnapshot: z.object({
-        fullName: z.string(),
+        full_name: z.string(),
         phone: z.string().nullable(),
-        companyName: z.string().nullable(),
-        vehicleInfo: z.string().nullable(),
+        company_name: z.string().nullable(),
+        vehicle_info: z.string().nullable(),
       }),
     })
   )
@@ -194,3 +194,12 @@ export const completePickup = createServerFn({ method: "POST" })
 
     return { pickup: updatedPickup, pointsAwarded: points };
   });
+
+export const initBuckets = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { ensureBucketsExist } = await import("@/integrations/supabase/client.server");
+    await ensureBucketsExist();
+    return { success: true };
+  });
+

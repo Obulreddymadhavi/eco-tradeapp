@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { createPickup } from "@/lib/api/pickups";
+import { createPickup, initBuckets } from "@/lib/api/pickups";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,13 @@ function NewPickupPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    // Proactively verify/create required storage buckets in Supabase when this screen loads
+    initBuckets().catch((err) => {
+      console.warn("[Storage] Bucket pre-initialization check failed/skipped:", err);
+    });
+  }, []);
 
   useEffect(() => {
     if (profile?.address) {
