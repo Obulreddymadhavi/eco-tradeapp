@@ -44,14 +44,14 @@ export const updateUserProfile = createServerFn({ method: "POST" })
 
     const { data: updatedProfile, error } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: userId,
         full_name: fullName,
         phone,
         address,
         company_name: role === "vendor" ? companyName : null,
         vehicle_info: role === "vendor" ? vehicleInfo : null,
-      })
-      .eq("id", userId)
+      }, { onConflict: "id" })
       .select()
       .single();
 
