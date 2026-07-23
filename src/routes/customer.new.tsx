@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createPickup } from "@/lib/api/pickups";
 import { useAuth } from "@/lib/auth";
@@ -45,6 +45,12 @@ function NewPickupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [locating, setLocating] = useState(false);
 
+  useEffect(() => {
+    if (profile?.address) {
+      setAddress(profile.address);
+    }
+  }, [profile]);
+
   function shareLocation() {
     if (!navigator.geolocation) {
       toast.error("Geolocation not supported");
@@ -76,7 +82,7 @@ function NewPickupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !profile) return;
+    if (!user) return;
     setSubmitting(true);
     try {
       const photo_urls = await uploadPhotos();
@@ -92,9 +98,9 @@ function NewPickupPage() {
           latitude: coords?.lat ?? null,
           longitude: coords?.lng ?? null,
           customerSnapshot: {
-            fullName: profile.full_name,
-            phone: profile.phone ?? null,
-            address: profile.address ?? null,
+            fullName: profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Customer",
+            phone: profile?.phone ?? null,
+            address: (address || profile?.address) ?? null,
           },
         }
       });

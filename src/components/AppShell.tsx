@@ -14,7 +14,7 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
     return <FullScreenSpinner />;
   }
   if (requireAuth && !user) {
-    if (typeof window !== "undefined") router.navigate({ to: "/auth" });
+    if (typeof window !== "undefined") router.navigate({ to: "/auth", search: { mode: "signin", role: "customer" } });
     return <FullScreenSpinner />;
   }
   if (requireRole && role && role !== requireRole && role !== "admin") {
@@ -61,7 +61,7 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
               </>
             ) : (
               <Button asChild size="sm" className="bg-eco-gradient">
-                <Link to="/auth">Sign in</Link>
+                <Link to="/auth" search={{ mode: "signin", role: "customer" }}>Sign in</Link>
               </Button>
             )}
           </nav>

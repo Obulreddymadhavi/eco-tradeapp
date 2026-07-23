@@ -23,6 +23,8 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     // Register listener FIRST then load session (avoid races)
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
@@ -30,20 +32,31 @@ export function useAuth() {
       if (!sess) {
         setRole(null);
         setProfile(null);
+        setLoading(false);
       } else {
         // defer fetch to next tick to avoid deadlock with onAuthStateChange
-        setTimeout(() => loadProfile(sess.user.id), 0);
+        setTimeout(async () => {
+          if (cancelled) return;
+          await loadProfile(sess.user.id);
+          if (!cancelled) setLoading(false);
+        }, 0);
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled) return;
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session) loadProfile(data.session.user.id);
-      setLoading(false);
+      if (data.session) {
+        await loadProfile(data.session.user.id);
+      }
+      if (!cancelled) setLoading(false);
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   async function loadProfile(userId: string) {
