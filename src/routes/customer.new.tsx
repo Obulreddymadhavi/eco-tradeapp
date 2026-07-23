@@ -114,6 +114,7 @@ function NewPickupPage() {
     setSubmitting(true);
     try {
       const photo_urls = await uploadPhotos();
+
       await createPickup({
         data: {
           category,
@@ -132,6 +133,7 @@ function NewPickupPage() {
           },
         }
       });
+
       toast.success("Pickup scheduled! Vendors will see it now.");
       navigate({ to: "/customer" });
     } catch (err) {
