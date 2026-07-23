@@ -7,7 +7,7 @@ import { ChatNotifications } from "@/components/ChatNotifications";
 import type { ReactNode } from "react";
 
 export function AppShell({ children, requireAuth, requireRole }: { children: ReactNode; requireAuth?: boolean; requireRole?: AppRole }) {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, switchRole } = useAuth();
   const router = useRouter();
 
   if (loading && requireAuth) {
@@ -75,6 +75,22 @@ export function AppShell({ children, requireAuth, requireRole }: { children: Rea
             <ThemeToggle />
             {user ? (
               <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs border-leaf/40 hover:bg-leaf/10 font-semibold flex items-center gap-1.5"
+                  onClick={() => switchRole(role === "vendor" ? "customer" : "vendor")}
+                >
+                  {role === "vendor" ? (
+                    <>
+                      <UserIcon className="h-3.5 w-3.5 text-leaf" /> Switch to Customer
+                    </>
+                  ) : (
+                    <>
+                      <Truck className="h-3.5 w-3.5 text-leaf" /> Switch to Vendor
+                    </>
+                  )}
+                </Button>
                 <NavLink to="/profile" icon={<UserIcon className="h-4 w-4" />}>Profile</NavLink>
                 <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out">
                   <LogOut className="h-4 w-4" />

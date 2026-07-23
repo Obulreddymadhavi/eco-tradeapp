@@ -93,3 +93,39 @@ export const updateUserProfile = createServerFn({ method: "POST" })
 
     return updatedProfile as Profile;
   });
+
+export const switchUserRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      role: z.enum(["customer", "vendor"]),
+    })
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const { role } = data;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Delete existing roles
+    await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId);
+
+    // Insert the new role
+    const { data: roleRow, error } = await supabaseAdmin
+      .from("user_roles")
+      .insert({
+        user_id: userId,
+        role: role,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return roleRow;
+  });

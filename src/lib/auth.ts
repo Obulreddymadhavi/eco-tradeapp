@@ -124,7 +124,29 @@ export function useAuth() {
     setProfile(profileVal);
   }
 
-  return { session, user, role, profile, loading, reload: () => user && loadProfile(user.id) };
+  async function switchRole(newRole: AppRole) {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { switchUserRole } = await import("@/lib/api/profile");
+      await switchUserRole({ data: { role: newRole as "customer" | "vendor" } });
+      await loadProfile(user.id);
+      window.location.href = newRole === "vendor" ? "/vendor" : "/customer";
+    } catch (err) {
+      console.error("Failed to switch role:", err);
+      setLoading(false);
+    }
+  }
+
+  return {
+    session,
+    user,
+    role,
+    profile,
+    loading,
+    reload: () => user && loadProfile(user.id),
+    switchRole,
+  };
 }
 
 export async function signOut() {
