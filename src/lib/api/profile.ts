@@ -12,13 +12,31 @@ export const getUserProfile = createServerFn({ method: "GET" })
     const { ensureBucketsExist } = await import("@/integrations/supabase/client.server");
     await ensureBucketsExist().catch(err => console.error("Bucket init failed:", err));
 
-    const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
+    let [{ data: roleRow }, { data: profileRow }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     ]);
 
+    let role = roleRow?.role as AppRole | undefined;
+
+    if (!role) {
+      role = "customer";
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error: insertErr } = await supabaseAdmin.from("user_roles").insert({
+          user_id: userId,
+          role: "customer"
+        });
+        if (insertErr) {
+          console.warn("[Auth] Failed to auto-insert user role: ", insertErr.message);
+        }
+      } catch (err) {
+        console.error("[Auth] Exception during user role fallback assignment:", err);
+      }
+    }
+
     return {
-      role: (roleRow?.role as AppRole) ?? "customer",
+      role,
       profile: profileRow as Profile | null,
     };
   });
