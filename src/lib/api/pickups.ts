@@ -121,7 +121,25 @@ export const createPickup = createServerFn({ method: "POST" })
         .select()
         .single();
       
-      if (userErr) throw new Error(userErr.message);
+      if (userErr) {
+        const { data: roleRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .maybeSingle();
+        
+        const dbRole = roleRow?.role ?? "NONE";
+        const hasProfile = !!profileRow;
+        
+        throw new Error(
+          `RLS Violation Details: user_id=${userId}, role_in_db=${dbRole}, profile_exists=${hasProfile}. Original: ${userErr.message}`
+        );
+      }
       return userPickup;
     }
 
