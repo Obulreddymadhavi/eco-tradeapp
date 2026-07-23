@@ -64,13 +64,12 @@ export function useAuth() {
     let profileVal: Profile | null = null;
 
     try {
-      const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
-        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      ]);
+      // Use the server function to fetch profile and ensure buckets exist
+      const { getUserProfile } = await import("@/lib/api/profile");
+      const data = await getUserProfile();
 
-      roleVal = (roleRow?.role as AppRole | undefined) ?? "customer";
-      profileVal = profileRow as Profile | null;
+      roleVal = data.role;
+      profileVal = data.profile;
 
       // Safety fallback: if authenticated user has no profile row, create it
       if (!profileVal) {

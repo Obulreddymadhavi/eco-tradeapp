@@ -42,3 +42,30 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdm
   },
 });
 
+/**
+ * Ensures required storage buckets exist.
+ * This can be called from server functions to auto-provision buckets.
+ */
+export async function ensureBucketsExist() {
+  const buckets = ['avatars', 'waste-photos'];
+  const admin = _supabaseAdmin || createSupabaseAdminClient();
+
+  for (const bucket of buckets) {
+    try {
+      const { data, error } = await admin.storage.getBucket(bucket);
+      if (error && error.message && error.message.toLowerCase().includes('not found')) {
+        console.log(`[Supabase] Creating missing bucket: ${bucket}`);
+        const { error: createError } = await admin.storage.createBucket(bucket, {
+          public: false,
+          allowedMimeTypes: ['image/*'],
+          fileSizeLimit: 5242880 // 5MB
+        });
+        if (createError) {
+          console.error(`[Supabase] Failed to create bucket ${bucket}:`, createError.message);
+        }
+      }
+    } catch (err) {
+      console.error(`[Supabase] Error checking bucket ${bucket}:`, err);
+    }
+  }
+}

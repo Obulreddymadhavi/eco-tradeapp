@@ -8,6 +8,10 @@ export const getUserProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
+    // Ensure buckets exist on the first few loads
+    const { ensureBucketsExist } = await import("@/integrations/supabase/client.server");
+    await ensureBucketsExist().catch(err => console.error("Bucket init failed:", err));
+
     const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),

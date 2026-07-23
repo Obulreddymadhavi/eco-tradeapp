@@ -37,9 +37,19 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+let bucketsChecked = false;
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      if (!bucketsChecked) {
+        bucketsChecked = true;
+        import("./integrations/supabase/client.server").then(({ ensureBucketsExist }) => {
+          ensureBucketsExist().catch((err) => {
+            console.warn("[Supabase] Failed to auto-provision buckets:", err);
+          });
+        });
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
